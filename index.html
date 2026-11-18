@@ -1,0 +1,2347 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>لعبة عبدالعزيز</title>
+  <style>
+    :root {
+      --bg-sky-top: #0ea5e9;
+      --bg-sky-mid: #7dd3fc;
+      --bg-sky-bottom: #e0f2fe;
+      --card-bg: rgba(255, 255, 255, 0.96);
+      --primary: #f59e0b;
+      --primary-dark: #ea580c;
+      --accent: #0284c7;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --danger: #ef4444;
+      --success: #10b981;
+      --border: #e2e8f0;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+      font-family: system-ui, -apple-system, "Segoe UI", Tahoma, Arial, sans-serif;
+    }
+
+    input, select, textarea {
+      user-select: text;
+      -webkit-user-select: text;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      min-height: 100vh;
+      background: linear-gradient(180deg, var(--bg-sky-top) 0%, var(--bg-sky-mid) 55%, var(--bg-sky-bottom) 100%);
+      color: var(--text-main);
+      overflow-x: hidden;
+    }
+
+    .app-container {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 12px 14px 36px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* الشريط العلوي */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(8px);
+      padding: 10px 14px;
+      border-radius: 18px;
+      box-shadow: 0 4px 16px rgba(2, 132, 199, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 900;
+      font-size: 1.08rem;
+      color: #0369a1;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .icon-btn {
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      color: var(--text-main);
+      border-radius: 12px;
+      padding: 7px 11px;
+      font-size: 0.88rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: transform 0.12s ease, background 0.15s ease;
+    }
+
+    .icon-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* البطاقات */
+    .card {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 16px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+    }
+
+    .section-title {
+      margin: 0 0 10px;
+      font-size: 1rem;
+      font-weight: 800;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    /* تنبيه الحفظ المحلي */
+    .sync-hint-box {
+      background: #fffbeb;
+      border: 1.5px solid #fde68a;
+      color: #92400e;
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-size: 0.81rem;
+      line-height: 1.55;
+      font-weight: 700;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    /* الحقول */
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .input-label {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: #334155;
+    }
+
+    .text-input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 2px solid #cbd5e1;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #0f172a;
+      background: #ffffff;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .text-input:focus {
+      border-color: #0284c7;
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.14);
+    }
+
+    .error-msg {
+      color: var(--danger);
+      font-size: 0.84rem;
+      font-weight: 800;
+      display: none;
+      margin-top: 2px;
+    }
+
+    @keyframes shakeX {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+    .shake {
+      animation: shakeX 0.28s ease;
+    }
+
+    /* شبكة الأبطال الستة */
+    .heroes-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .hero-card {
+      background: #f8fafc;
+      border: 2.5px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 10px 6px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.16s ease;
+      position: relative;
+    }
+
+    .hero-card.selected {
+      background: #fef3c7;
+      border-color: #f59e0b;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(245, 158, 11, 0.25);
+    }
+
+    .hero-avatar {
+      width: 62px;
+      height: 62px;
+      border-radius: 50%;
+      margin: 0 auto 6px;
+      border: 3px solid #ffffff;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+      object-fit: cover;
+      display: block;
+      background: #e0f2fe;
+    }
+
+    .hero-name {
+      font-weight: 800;
+      font-size: 0.92rem;
+      color: #0f172a;
+    }
+
+    .hero-badge {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      background: #f59e0b;
+      color: #ffffff;
+      font-size: 0.72rem;
+      font-weight: 900;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-card.selected .hero-badge {
+      display: flex;
+    }
+
+    /* اختيار السرعة */
+    .speed-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .speed-btn {
+      padding: 9px 6px;
+      border-radius: 12px;
+      border: 2px solid #e2e8f0;
+      background: #f8fafc;
+      font-weight: 800;
+      font-size: 0.84rem;
+      cursor: pointer;
+      color: #334155;
+      transition: all 0.15s ease;
+    }
+
+    .speed-btn.active {
+      background: #e0f2fe;
+      border-color: #0284c7;
+      color: #0369a1;
+    }
+
+    .locked-speed-badge {
+      background: #f1f5f9;
+      border: 1.5px solid #cbd5e1;
+      color: #334155;
+      padding: 9px 12px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 14px;
+      display: none;
+    }
+
+    /* الأزرار الرئيسية */
+    .btn-primary {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: #ffffff;
+      font-size: 1.08rem;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(234, 88, 12, 0.32);
+      transition: transform 0.12s ease;
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98);
+    }
+
+    .btn-secondary {
+      width: 100%;
+      padding: 11px;
+      border: 2px solid #cbd5e1;
+      border-radius: 14px;
+      background: #ffffff;
+      color: #0f172a;
+      font-size: 0.92rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.12s ease;
+    }
+
+    .btn-secondary:active {
+      transform: scale(0.98);
+    }
+
+    /* شاشة اللعب */
+    #gameScreen {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .game-hud {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 8px 14px;
+      border-radius: 16px;
+      font-weight: 800;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+    }
+
+    .hud-player {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.92rem;
+    }
+
+    .hud-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2.5px solid #f59e0b;
+    }
+
+    .hud-score {
+      font-size: 1.45rem;
+      color: #ea580c;
+      font-weight: 900;
+    }
+
+    .canvas-wrapper {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      max-height: 68vh;
+      margin: 0 auto;
+      border-radius: 22px;
+      overflow: hidden;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.2);
+      background: #38bdf8;
+      touch-action: none;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+      touch-action: none;
+    }
+
+    .game-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.56);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 5;
+    }
+
+    .overlay-box {
+      background: #ffffff;
+      border-radius: 22px;
+      padding: 20px 18px;
+      width: 100%;
+      max-width: 340px;
+      text-align: center;
+      box-shadow: 0 14px 32px rgba(0, 0, 0, 0.25);
+    }
+
+    .overlay-title {
+      margin: 0 0 6px;
+      font-size: 1.35rem;
+      font-weight: 900;
+      color: #0f172a;
+    }
+
+    .overlay-sub {
+      margin: 0 0 14px;
+      font-size: 0.92rem;
+      color: #475569;
+      font-weight: 700;
+      line-height: 1.5;
+    }
+
+    .score-summary {
+      display: flex;
+      justify-content: space-around;
+      background: #f8fafc;
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 14px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .score-box span {
+      display: block;
+      font-size: 0.78rem;
+      color: #64748b;
+      font-weight: 700;
+    }
+
+    .score-box strong {
+      font-size: 1.45rem;
+      color: #ea580c;
+      font-weight: 900;
+    }
+
+    /* قائمة الترتيب */
+    .tabs {
+      display: flex;
+      gap: 6px;
+      background: #f1f5f9;
+      padding: 4px;
+      border-radius: 12px;
+      margin-bottom: 10px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 8px;
+      border: none;
+      border-radius: 9px;
+      background: transparent;
+      font-weight: 800;
+      font-size: 0.85rem;
+      color: #475569;
+      cursor: pointer;
+    }
+
+    .tab-btn.active {
+      background: #ffffff;
+      color: #0369a1;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    }
+
+    .leader-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .leader-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 12px;
+      background: #f8fafc;
+      border-radius: 13px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .leader-item.top-1 {
+      background: #fef9c3;
+      border-color: #facc15;
+    }
+
+    .leader-left {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .rank-badge {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #e2e8f0;
+      color: #1e293b;
+      font-weight: 900;
+      font-size: 0.82rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .top-1 .rank-badge {
+      background: #eab308;
+      color: #ffffff;
+    }
+
+    .leader-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #ffffff;
+      flex-shrink: 0;
+    }
+
+    .leader-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .leader-name {
+      font-weight: 800;
+      font-size: 0.92rem;
+      color: #0f172a;
+    }
+
+    .leader-hero {
+      font-size: 0.76rem;
+      color: #64748b;
+      font-weight: 700;
+    }
+
+    .leader-score {
+      font-weight: 900;
+      font-size: 1.02rem;
+      color: #0369a1;
+      white-space: nowrap;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 20px 10px;
+      color: #64748b;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    /* لوحة تحكم المشرف */
+    #adminScreen {
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .admin-header {
+      background: #1e293b;
+      color: #ffffff;
+      padding: 14px 16px;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .admin-notice {
+      background: #eff6ff;
+      border: 1.5px solid #bfdbfe;
+      color: #1e3a8a;
+      border-radius: 14px;
+      padding: 11px 13px;
+      font-size: 0.82rem;
+      line-height: 1.6;
+      font-weight: 700;
+    }
+
+    .admin-hero-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 9px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .admin-hero-row:last-child {
+      border-bottom: none;
+    }
+
+    .mini-name-input {
+      width: 112px;
+      padding: 7px 9px;
+      border-radius: 10px;
+      border: 1.5px solid #cbd5e1;
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .upload-label {
+      background: #0284c7;
+      color: #ffffff;
+      padding: 7px 10px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .del-btn {
+      background: #fee2e2;
+      color: #dc2626;
+      border: none;
+      border-radius: 8px;
+      padding: 5px 9px;
+      font-weight: 800;
+      font-size: 0.78rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .badge-status {
+      font-size: 0.75rem;
+      padding: 3px 9px;
+      border-radius: 99px;
+      background: #dcfce7;
+      color: #166534;
+      font-weight: 800;
+    }
+
+    /* النوافذ المنبثقة المخصصة */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(3px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 99;
+    }
+
+    .modal-card {
+      background: #ffffff;
+      border-radius: 22px;
+      padding: 20px;
+      width: 100%;
+      max-width: 350px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+    }
+
+    /* إشعار عائم Toast */
+    .toast-banner {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(120px);
+      background: #0f172a;
+      color: #ffffff;
+      padding: 12px 18px;
+      border-radius: 14px;
+      font-size: 0.88rem;
+      font-weight: 800;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+      z-index: 120;
+      max-width: 90vw;
+      text-align: center;
+      transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .toast-banner.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+  <!-- الشريط العلوي -->
+  <div class="top-bar">
+    <div class="brand">
+      <span>🚀</span>
+      <span id="brandTitleText">لعبة عبدالعزيز</span>
+    </div>
+    <div class="top-actions">
+      <button type="button" class="icon-btn" id="soundToggleBtn" title="الصوت">🔊</button>
+      <button type="button" class="icon-btn" id="shareBtn" title="مشاركة الرابط">📤 مشاركة</button>
+      <button type="button" class="icon-btn" id="adminLockBtn" title="لوحة المشرف">🔒</button>
+    </div>
+  </div>
+
+  <!-- تنبيه إيقاف البطولة مؤقتاً -->
+  <div class="card" id="pausedBanner" style="display:none; text-align:center; background:#fef2f2; border-color:#fecaca;">
+    <h3 style="margin:0 0 6px; color:#dc2626;">⏸️ التحدي متوقف مؤقتاً من المشرف</h3>
+    <p style="margin:0; font-size:0.9rem; color:#7f1d1d; font-weight:700;">سيتم فتح الجولة القادمة قريباً!</p>
+  </div>
+
+  <!-- 1. شاشة البداية (Lobby) -->
+  <div id="lobbyScreen" style="display:flex; flex-direction:column; gap:12px;">
+    <div class="card" id="entryCard">
+      <div class="input-group">
+        <label class="input-label" for="playerNameInput">1. اكتب اسمك للمنافسة:</label>
+        <input
+          type="text"
+          id="playerNameInput"
+          class="text-input"
+          placeholder="اكتب اسمك هنا"
+          maxlength="24"
+          autocomplete="off"
+          autocorrect="off"
+          spellcheck="false"
+        />
+        <div class="error-msg" id="nameError">⚠️ فضلاً اكتب اسمك أولاً قبل بدء اللعب!</div>
+      </div>
+
+      <div class="input-label" style="margin-bottom:8px;">2. اختر البطل الذي ستلعب به:</div>
+      <div class="heroes-grid" id="heroesGrid"></div>
+
+      <div id="speedSelectorWrap">
+        <div class="input-label" style="margin-bottom:6px;">3. مستوى السرعة:</div>
+        <div class="speed-row" id="speedRow">
+          <button type="button" class="speed-btn active" data-speed="easy">🐢 سهل (للصغار)</button>
+          <button type="button" class="speed-btn" data-speed="medium">⚡ متوسط</button>
+          <button type="button" class="speed-btn" data-speed="hard">🔥 سريع</button>
+        </div>
+      </div>
+      <div class="locked-speed-badge" id="lockedSpeedBadge"></div>
+
+      <button type="button" class="btn-primary" id="startGameBtn">🎮 ابدأ اللعب الآن!</button>
+    </div>
+
+    <!-- تنبيه ذكي حول المزامنة والمتصفح الداخلي -->
+    <div class="sync-hint-box" id="localStorageNotice">
+      <span style="font-size:1.1rem;">💡</span>
+      <div>
+        الحفظ حالياً <strong>محلي على هذا الجهاز</strong>، وفتح الرابط من متصفح واتساب الداخلي قد يصفر النقاط عند إغلاقه. افتح الرابط في <strong>Safari أو Chrome</strong>، أو اربط <strong>Firebase</strong> من لوحة المشرف لتظهر نتائجك ونتائج أختك لحظياً في قائمة واحدة.
+      </div>
+    </div>
+
+    <!-- بطاقة قائمة الترتيب -->
+    <div class="card">
+      <div class="section-title">
+        <span>🏆 قائمة الترتيب (من الأعلى)</span>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <button type="button" class="icon-btn" id="refreshScoresBtn" style="padding:4px 8px; font-size:0.8rem;" title="تحديث">🔄</button>
+          <span class="badge-status" id="syncBadge">محلي</span>
+        </div>
+      </div>
+      <div class="tabs">
+        <button type="button" class="tab-btn active" data-tab="players">ترتيب اللاعبين</button>
+        <button type="button" class="tab-btn" data-tab="heroes">ترتيب الأبطال الستة</button>
+      </div>
+      <div class="leader-list" id="leaderboardList"></div>
+    </div>
+  </div>
+
+  <!-- 2. شاشة اللعب (Gameplay) -->
+  <div id="gameScreen">
+    <div class="game-hud">
+      <div class="hud-player">
+        <img id="hudAvatar" class="hud-avatar" src="" alt="" />
+        <div>
+          <div id="hudPlayerName" style="line-height:1.15;"></div>
+          <div id="hudHeroName" style="font-size:0.75rem; color:#64748b;"></div>
+        </div>
+      </div>
+      <div class="hud-score" id="hudScore">0</div>
+      <button type="button" class="icon-btn" id="exitGameBtn">🏠 خروج</button>
+    </div>
+
+    <div class="canvas-wrapper">
+      <canvas id="gameCanvas" width="420" height="560"></canvas>
+
+      <!-- طبقة الاستعداد / نهاية الجولة -->
+      <div class="game-overlay" id="gameOverlay">
+        <div class="overlay-box" id="readyBox">
+          <h3 class="overlay-title">استعد للطيران! ✈️</h3>
+          <p class="overlay-sub">اضغط على الشاشة أو زر المسافة للقفز وتفادي الأعمدة</p>
+          <button type="button" class="btn-primary" id="tapStartBtn">انطلق! 🚀</button>
+        </div>
+
+        <div class="overlay-box" id="gameOverBox" style="display:none;">
+          <h3 class="overlay-title">انتهت الجولة! 🌟</h3>
+          <p class="overlay-sub" id="gameOverMsg">أحسنت يا بطل!</p>
+          <div class="score-summary">
+            <div class="score-box">
+              <span>نتيجتك</span>
+              <strong id="finalScoreText">0</strong>
+            </div>
+            <div class="score-box">
+              <span>أعلى نتيجة لك</span>
+              <strong id="bestScoreText">0</strong>
+            </div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <button type="button" class="btn-primary" id="playAgainBtn">🔄 العب مرة ثانية</button>
+            <button type="button" class="btn-secondary" id="backToLobbyBtn">🏆 عرض قائمة الترتيب</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. لوحة تحكم المشرف -->
+  <div id="adminScreen">
+    <div class="admin-header">
+      <div>
+        <div style="font-weight:900; font-size:1.05rem;">🛠️ لوحة تحكم المشرف</div>
+        <div style="font-size:0.78rem; color:#94a3b8;">خاص بك وحدك — لا يظهر للاعبين</div>
+      </div>
+      <button type="button" class="icon-btn" id="exitAdminBtn">عودة للعبة</button>
+    </div>
+
+    <div class="admin-notice">
+      💡 <strong>كيفية تثبيت التعديلات والمزامنة للجميع:</strong><br/>
+      • لمزامنة النقاط أونلاين بين جوالك وجوال أختك لحظياً: ضع رابط <strong>Firebase Realtime Database</strong> في الأسفل واضغط حفظ.<br/>
+      • لتثبيت الصور والأسماء والرمز السري في رابط GitHub نهائياً: اضغط زر <strong>«💾 تنزيل ملف index.html جاهز»</strong> وارفعه مكان القديم.
+    </div>
+
+    <!-- روابط المشاركة -->
+    <div class="card">
+      <div class="section-title">🔗 روابط المشاركة</div>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <button type="button" class="btn-primary" style="padding:11px; font-size:0.95rem;" id="copyPlayerLinkBtn">📋 نسخ رابط اللاعبين (للقروب)</button>
+        <button type="button" class="btn-secondary" style="padding:10px; font-size:0.88rem;" id="copyAdminLinkBtn">🔐 نسخ رابط المشرف الخاص بك</button>
+      </div>
+    </div>
+
+    <!-- إدارة أسماء وصور الأبطال الستة -->
+    <div class="card">
+      <div class="section-title">📸 أسماء وصور الأبطال الستة</div>
+      <p style="margin:0 0 10px; font-size:0.82rem; color:#475569; font-weight:600;">
+        عدّل اسم أو صورة أي بطل، ثم نزّل الملف المحدث لرفعه في GitHub:
+      </p>
+      <div id="adminHeroesList"></div>
+    </div>
+
+    <!-- إعدادات البطولة والمزامنة -->
+    <div class="card">
+      <div class="section-title">⚙️ إعدادات البطولة والمزامنة</div>
+      <div class="input-group">
+        <label class="input-label" for="adminGameTitle">عنوان اللعبة في الأعلى:</label>
+        <input type="text" id="adminGameTitle" class="text-input" style="padding:10px;" placeholder="لعبة عبدالعزيز" />
+      </div>
+
+      <div class="input-group">
+        <label class="input-label" for="adminSpeedLock">سرعة اللعب للجميع:</label>
+        <select id="adminSpeedLock" class="text-input" style="padding:10px;">
+          <option value="free">حر (كل لاعب يختار سرعته)</option>
+          <option value="easy">إجباري: سهل (للصغار)</option>
+          <option value="medium">إجباري: متوسط</option>
+          <option value="hard">إجباري: سريع</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label" for="adminGameStatus">حالة البطولة:</label>
+        <select id="adminGameStatus" class="text-input" style="padding:10px;">
+          <option value="open">مفتوحة للعب</option>
+          <option value="paused">متوقفة مؤقتاً</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label" for="adminNewPin">تغيير الرقم السري للمشرف:</label>
+        <input
+          type="password"
+          id="adminNewPin"
+          class="text-input"
+          style="padding:10px;"
+          inputmode="numeric"
+          autocomplete="new-password"
+          placeholder="أدخل رمزاً سرياً جديداً (اتركه فارغاً للإبقاء على الحالي)"
+        />
+      </div>
+
+      <div class="input-group">
+        <label class="input-label" for="adminFirebaseUrl">رابط Firebase للمزامنة السحابية الحية (اختياري):</label>
+        <input
+          type="url"
+          id="adminFirebaseUrl"
+          class="text-input"
+          style="padding:10px; direction:ltr;"
+          placeholder="https://your-project-default-rtdb.firebaseio.com"
+        />
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:9px;">
+        <button type="button" class="btn-secondary" style="background:#f0fdf4; border-color:#86efac; color:#166534;" id="saveAdminSettingsBtn">✅ حفظ الإعدادات</button>
+        <button type="button" class="btn-primary" style="background:linear-gradient(135deg,#0284c7,#0369a1); font-size:0.96rem;" id="exportBakedHtmlBtn">
+          💾 تنزيل ملف index.html جاهز بالصور والرمز السري لرفعه في GitHub
+        </button>
+      </div>
+    </div>
+
+    <!-- إدارة قائمة الترتيب -->
+    <div class="card">
+      <div class="section-title">
+        <span>🧹 إدارة قائمة الترتيب</span>
+        <button type="button" class="del-btn" id="resetScoresBtn">تصفير الكل</button>
+      </div>
+      <div id="adminScoresList" class="leader-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- نافذة إدخال الرقم السري للمشرف -->
+<div class="modal-backdrop" id="pinModal">
+  <div class="modal-card">
+    <h3 style="margin:0 0 8px;">🔐 دخول المشرف</h3>
+    <p style="margin:0 0 12px; font-size:0.86rem; color:#64748b; font-weight:700;">أدخل الرقم السري الخاص بك</p>
+    <input
+      type="password"
+      id="pinInput"
+      class="text-input"
+      style="text-align:center; letter-spacing:4px; margin-bottom:10px;"
+      placeholder="••••"
+      inputmode="numeric"
+      autocomplete="off"
+    />
+    <div class="error-msg" id="pinError" style="margin-bottom:8px;">❌ الرقم السري غير صحيح</div>
+    <div style="display:flex; gap:8px;">
+      <button type="button" class="btn-primary" style="padding:10px;" id="verifyPinBtn">دخول</button>
+      <button type="button" class="btn-secondary" style="padding:10px;" id="closePinModalBtn">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- نافذة تأكيد تصفير النتائج (بديل مخصص لـ confirm) -->
+<div class="modal-backdrop" id="confirmModal">
+  <div class="modal-card">
+    <h3 style="margin:0 0 8px; color:#dc2626;">⚠️ تأكيد تصفير القائمة</h3>
+    <p style="margin:0 0 16px; font-size:0.88rem; color:#475569; font-weight:700; line-height:1.5;">
+      هل أنت متأكد من حذف جميع نتائج قائمة الترتيب؟ لا يمكن التراجع عن هذه الخطوة.
+    </p>
+    <div style="display:flex; gap:8px;">
+      <button type="button" class="btn-primary" style="padding:10px; background:#dc2626;" id="confirmResetYesBtn">نعم، تصفير الكل</button>
+      <button type="button" class="btn-secondary" style="padding:10px;" id="confirmResetNoBtn">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- إشعار Toast -->
+<div class="toast-banner" id="toastBanner"></div>
+
+<!-- الإعدادات المدمجة داخل الملف -->
+<script id="embedded-config" type="application/json">
+{
+  "gameTitle": "لعبة عبدالعزيز",
+  "pin": "1122",
+  "speedLock": "free",
+  "status": "open",
+  "firebaseUrl": "",
+  "customNames": {},
+  "customPhotos": {}
+}
+</script>
+
+<script>
+(function() {
+  "use strict";
+
+  // 1. الأبطال الستة الافتراضيون
+  const DEFAULT_KIDS = [
+    { id: "ghana", name: "غنى", color: "#ec4899", bg: "#fce7f3", emoji: "👧🏻" },
+    { id: "tamim", name: "تميم", color: "#0284c7", bg: "#e0f2fe", emoji: "👦🏻" },
+    { id: "saif", name: "سيف", color: "#16a34a", bg: "#dcfce7", emoji: "🦸🏻‍♂️" },
+    { id: "leen", name: "لين", color: "#9333ea", bg: "#f3e8ff", emoji: "🧚🏻‍♀️" },
+    { id: "saud", name: "سعود", color: "#ea580c", bg: "#ffedd5", emoji: "🚀" },
+    { id: "aljawhara", name: "الجوهرة", color: "#d97706", bg: "#fef3c7", emoji: "👑" }
+  ];
+
+  // نظام إشعارات Toast بديل آمن لـ alert()
+  let toastTimer = null;
+  function showToast(msg, duration = 3400) {
+    const el = document.getElementById("toastBanner");
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      el.classList.remove("show");
+    }, duration);
+  }
+
+  // نسخ النص بطريقة متوافقة مع iframe والمتصفحات
+  function copyTextSafe(text) {
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      ta.style.top = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      ta.setSelectionRange(0, 99999);
+      const ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      if (ok) return true;
+    } catch (e) {}
+    return false;
+  }
+
+  // تحميل الإعدادات المدمجة داخل الملف
+  let embeddedConfig = {
+    gameTitle: "لعبة عبدالعزيز",
+    pin: "1122",
+    speedLock: "free",
+    status: "open",
+    firebaseUrl: "",
+    customNames: {},
+    customPhotos: {}
+  };
+  try {
+    const rawCfg = document.getElementById("embedded-config").textContent.trim();
+    if (rawCfg) embeddedConfig = Object.assign(embeddedConfig, JSON.parse(rawCfg));
+  } catch (e) {}
+
+  // تخزين محلي مزدوج آمن (localStorage + window.name fallback)
+  const STORAGE_KEYS = {
+    CONFIG: "abdelaziz_game_config_v1",
+    SCORES: "abdelaziz_game_scores_v1"
+  };
+  const WINDOW_NAME_PREFIX = "ABDELAZIZ_STATE_V1:";
+
+  function readWindowNameBackup() {
+    try {
+      if (typeof window.name === "string" && window.name.startsWith(WINDOW_NAME_PREFIX)) {
+        return JSON.parse(window.name.slice(WINDOW_NAME_PREFIX.length));
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  function writeWindowNameBackup(cfg, scores) {
+    try {
+      // نحفظ بدون الصور الثقيلة في window.name لتجنب تجاوز الحجم
+      const lightCfg = {
+        gameTitle: cfg.gameTitle,
+        pin: cfg.pin,
+        speedLock: cfg.speedLock,
+        status: cfg.status,
+        firebaseUrl: cfg.firebaseUrl,
+        customNames: cfg.customNames || {}
+      };
+      window.name = WINDOW_NAME_PREFIX + JSON.stringify({ config: lightCfg, scores: scores });
+    } catch (e) {}
+  }
+
+  function saveLocalConfig(cfg) {
+    try {
+      localStorage.setItem(STORAGE_KEYS.CONFIG, JSON.stringify(cfg));
+    } catch (e) {}
+    writeWindowNameBackup(cfg, scoresList);
+  }
+
+  function saveLocalScores(list) {
+    try {
+      localStorage.setItem(STORAGE_KEYS.SCORES, JSON.stringify(list));
+    } catch (e) {}
+    writeWindowNameBackup(appConfig, list);
+  }
+
+  let appConfig = Object.assign({}, embeddedConfig);
+  const wnBackup = readWindowNameBackup();
+  if (wnBackup && wnBackup.config) {
+    appConfig = Object.assign(appConfig, wnBackup.config);
+  }
+  try {
+    const savedCfg = JSON.parse(localStorage.getItem(STORAGE_KEYS.CONFIG) || "null");
+    if (savedCfg) {
+      appConfig.gameTitle = savedCfg.gameTitle || appConfig.gameTitle;
+      appConfig.pin = savedCfg.pin || appConfig.pin;
+      appConfig.speedLock = savedCfg.speedLock || appConfig.speedLock;
+      appConfig.status = savedCfg.status || appConfig.status;
+      appConfig.firebaseUrl = savedCfg.firebaseUrl || appConfig.firebaseUrl;
+      appConfig.customNames = Object.assign({}, appConfig.customNames, savedCfg.customNames || {});
+      appConfig.customPhotos = Object.assign({}, appConfig.customPhotos, savedCfg.customPhotos || {});
+    }
+  } catch (e) {}
+
+  let scoresList = [];
+  if (wnBackup && Array.isArray(wnBackup.scores)) {
+    scoresList = wnBackup.scores;
+  }
+  try {
+    const savedScores = JSON.parse(localStorage.getItem(STORAGE_KEYS.SCORES) || "null");
+    if (Array.isArray(savedScores) && savedScores.length > 0) {
+      scoresList = savedScores;
+    }
+  } catch (e) {}
+
+  let selectedHeroId = DEFAULT_KIDS[0].id;
+  let selectedSpeed = "easy";
+  let currentTab = "players";
+  let soundEnabled = true;
+  let isAdminAuthenticated = false;
+  let cloudPollTimer = null;
+
+  function normalizeName(str) {
+    return String(str || "").trim().replace(/\s+/g, " ");
+  }
+
+  // تحويل النص العربي إلى مفتاح Hex آمن لـ Firebase
+  function utf8ToHexKey(str) {
+    const clean = normalizeName(str).toLowerCase();
+    try {
+      if (typeof TextEncoder !== "undefined") {
+        const bytes = new TextEncoder().encode(clean);
+        return Array.from(bytes).map(b => b.toString(16).padStart(2, "0")).join("");
+      }
+    } catch (e) {}
+    const encoded = encodeURIComponent(clean);
+    let hex = "";
+    for (let i = 0; i < encoded.length; i++) {
+      hex += encoded.charCodeAt(i).toString(16).padStart(2, "0");
+    }
+    return hex;
+  }
+
+  function makePlayerKey(playerName, heroId) {
+    return utf8ToHexKey(playerName + "__" + heroId);
+  }
+
+  function getHeroName(kidId) {
+    if (appConfig.customNames && appConfig.customNames[kidId] && appConfig.customNames[kidId].trim()) {
+      return appConfig.customNames[kidId].trim();
+    }
+    const kid = DEFAULT_KIDS.find(k => k.id === kidId) || DEFAULT_KIDS[0];
+    return kid.name;
+  }
+
+  function createAvatarSvg(kid) {
+    const displayName = getHeroName(kid.id);
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140" viewBox="0 0 140 140">
+      <rect width="140" height="140" rx="70" fill="${kid.bg}"/>
+      <circle cx="70" cy="70" r="64" fill="none" stroke="${kid.color}" stroke-width="6"/>
+      <text x="70" y="74" font-size="52" text-anchor="middle" dominant-baseline="middle">${kid.emoji}</text>
+      <rect x="22" y="102" width="96" height="26" rx="13" fill="${kid.color}"/>
+      <text x="70" y="116" font-family="Tahoma, Arial, sans-serif" font-size="15" font-weight="bold" fill="#ffffff" text-anchor="middle" dominant-baseline="middle">${displayName}</text>
+    </svg>`;
+    return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+  }
+
+  const imageCache = {};
+  function getHeroPhoto(kidId) {
+    if (appConfig.customPhotos && appConfig.customPhotos[kidId]) {
+      return appConfig.customPhotos[kidId];
+    }
+    const kid = DEFAULT_KIDS.find(k => k.id === kidId) || DEFAULT_KIDS[0];
+    return createAvatarSvg(kid);
+  }
+
+  function preloadImages() {
+    DEFAULT_KIDS.forEach(kid => {
+      const img = new Image();
+      img.src = getHeroPhoto(kid.id);
+      imageCache[kid.id] = img;
+    });
+  }
+  preloadImages();
+
+  // محرك الصوت (Web Audio API)
+  let audioCtx = null;
+  function playTone(freq, type, duration, vol = 0.12) {
+    if (!soundEnabled) return;
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === "suspended") audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    } catch (e) {}
+  }
+
+  function sfxFlap() { playTone(440, "sine", 0.11, 0.1); }
+  function sfxScore() {
+    playTone(660, "triangle", 0.14, 0.12);
+    setTimeout(() => playTone(880, "triangle", 0.16, 0.12), 60);
+  }
+  function sfxBonus() {
+    playTone(587, "sine", 0.1, 0.12);
+    setTimeout(() => playTone(784, "sine", 0.12, 0.12), 55);
+    setTimeout(() => playTone(1046, "sine", 0.18, 0.14), 110);
+  }
+  function sfxHit() { playTone(180, "sawtooth", 0.25, 0.14); }
+
+  // =========================================================================
+  // المزامنة السحابية الذرية (Firebase Realtime Database REST API)
+  // =========================================================================
+  function getCleanDbUrl() {
+    const u = (appConfig.firebaseUrl || "").trim().replace(/\/+$/, "");
+    return u.startsWith("https://") ? u : "";
+  }
+
+  function mergeScoreArrays(localArr, remoteScoresData) {
+    const map = new Map();
+    const ingest = (item) => {
+      if (!item || !item.playerName || !item.heroId) return;
+      const cleanName = normalizeName(item.playerName);
+      const key = makePlayerKey(cleanName, item.heroId);
+      const numScore = Number(item.score) || 0;
+      const existing = map.get(key);
+      if (!existing || numScore > existing.score) {
+        map.set(key, {
+          id: key,
+          playerName: cleanName,
+          heroId: item.heroId,
+          score: numScore,
+          date: item.date || Date.now()
+        });
+      }
+    };
+
+    if (Array.isArray(localArr)) localArr.forEach(ingest);
+    if (Array.isArray(remoteScoresData)) {
+      remoteScoresData.forEach(ingest);
+    } else if (remoteScoresData && typeof remoteScoresData === "object") {
+      Object.values(remoteScoresData).forEach(ingest);
+    }
+    return Array.from(map.values());
+  }
+
+  async function syncFromCloud(silent = false) {
+    const dbUrl = getCleanDbUrl();
+    const badge = document.getElementById("syncBadge");
+    const noticeBox = document.getElementById("localStorageNotice");
+
+    if (!dbUrl) {
+      badge.textContent = "محلي";
+      badge.style.background = "#e0f2fe";
+      badge.style.color = "#0369a1";
+      if (noticeBox) noticeBox.style.display = "flex";
+      return;
+    }
+
+    if (noticeBox) noticeBox.style.display = "none";
+
+    try {
+      if (!silent) badge.textContent = "جاري التحديث...";
+      const res = await fetch(dbUrl + "/family_game.json", { cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        if (data) {
+          if (data.scores) {
+            scoresList = mergeScoreArrays(scoresList, data.scores);
+            saveLocalScores(scoresList);
+          }
+          if (data.config) {
+            appConfig.gameTitle = data.config.gameTitle || appConfig.gameTitle;
+            appConfig.pin = data.config.pin || appConfig.pin;
+            appConfig.speedLock = data.config.speedLock || appConfig.speedLock;
+            appConfig.status = data.config.status || appConfig.status;
+            if (data.config.customNames) {
+              appConfig.customNames = Object.assign({}, appConfig.customNames, data.config.customNames);
+            }
+            if (data.config.customPhotos) {
+              appConfig.customPhotos = Object.assign({}, appConfig.customPhotos, data.config.customPhotos);
+            }
+            saveLocalConfig(appConfig);
+            preloadImages();
+            renderHeroesGrid();
+            applyAdminConfigToUI();
+          }
+          renderLeaderboard();
+        }
+        badge.textContent = "متصل أونلاين 🟢";
+        badge.style.background = "#dcfce7";
+        badge.style.color = "#166534";
+      }
+    } catch (e) {
+      badge.textContent = "تعذر الاتصال";
+      badge.style.background = "#fee2e2";
+      badge.style.color = "#991b1b";
+    }
+  }
+
+  // إرسال نتيجة لاعب واحد فقط عبر PATCH ذري مع Math.max لمنع الكتابة فوق نتائج الآخرين
+  async function syncSingleScoreToCloud(entry) {
+    const dbUrl = getCleanDbUrl();
+    if (!dbUrl || !entry) return;
+    const playerKey = makePlayerKey(entry.playerName, entry.heroId);
+    const itemUrl = `${dbUrl}/family_game/scores/${playerKey}.json`;
+
+    try {
+      let remoteBest = 0;
+      const getRes = await fetch(itemUrl, { cache: "no-store" });
+      if (getRes.ok) {
+        const remoteObj = await getRes.json();
+        if (remoteObj && typeof remoteObj.score === "number") {
+          remoteBest = remoteObj.score;
+        }
+      }
+      const finalScore = Math.max(Number(entry.score) || 0, remoteBest);
+      await fetch(itemUrl, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: playerKey,
+          playerName: normalizeName(entry.playerName),
+          heroId: entry.heroId,
+          score: finalScore,
+          date: Date.now()
+        })
+      });
+      await syncFromCloud(true);
+    } catch (e) {}
+  }
+
+  async function pushConfigToCloud() {
+    const dbUrl = getCleanDbUrl();
+    if (!dbUrl) return;
+    try {
+      await fetch(dbUrl + "/family_game/config.json", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          gameTitle: appConfig.gameTitle,
+          pin: appConfig.pin,
+          speedLock: appConfig.speedLock,
+          status: appConfig.status,
+          customNames: appConfig.customNames,
+          customPhotos: appConfig.customPhotos
+        })
+      });
+    } catch (e) {}
+  }
+
+  function startAutoPolling() {
+    clearInterval(cloudPollTimer);
+    cloudPollTimer = setInterval(() => {
+      const lobbyVisible = document.getElementById("lobbyScreen").style.display !== "none";
+      if (lobbyVisible && getCleanDbUrl()) {
+        syncFromCloud(true);
+      }
+    }, 8000);
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, m => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    }[m]));
+  }
+
+  // رسم شبكة الأبطال الستة
+  function renderHeroesGrid() {
+    const grid = document.getElementById("heroesGrid");
+    grid.innerHTML = "";
+    DEFAULT_KIDS.forEach(kid => {
+      const displayName = getHeroName(kid.id);
+      const card = document.createElement("div");
+      card.className = "hero-card" + (kid.id === selectedHeroId ? " selected" : "");
+      card.innerHTML = `
+        <div class="hero-badge">✓</div>
+        <img class="hero-avatar" src="${getHeroPhoto(kid.id)}" alt="${escapeHtml(displayName)}" />
+        <div class="hero-name">${escapeHtml(displayName)}</div>
+      `;
+      card.onclick = () => {
+        selectedHeroId = kid.id;
+        renderHeroesGrid();
+        playTone(520, "sine", 0.08, 0.08);
+      };
+      grid.appendChild(card);
+    });
+  }
+
+  // رسم قائمة الترتيب
+  function renderLeaderboard() {
+    const container = document.getElementById("leaderboardList");
+    container.innerHTML = "";
+
+    if (currentTab === "players") {
+      const sorted = [...scoresList].sort((a, b) => b.score - a.score);
+      if (sorted.length === 0) {
+        container.innerHTML = `<div class="empty-state">لا توجد نتائج مسجلة بعد — اكتب اسمك وكن أول بطل يتصدر القائمة! 🏆</div>`;
+        return;
+      }
+      sorted.slice(0, 40).forEach((entry, idx) => {
+        const kid = DEFAULT_KIDS.find(k => k.id === entry.heroId) || DEFAULT_KIDS[0];
+        const heroDisplayName = getHeroName(kid.id);
+        const row = document.createElement("div");
+        row.className = "leader-item" + (idx === 0 ? " top-1" : "");
+        const medal = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : (idx + 1);
+        row.innerHTML = `
+          <div class="leader-left">
+            <div class="rank-badge">${medal}</div>
+            <img class="leader-avatar" src="${getHeroPhoto(kid.id)}" alt="${escapeHtml(heroDisplayName)}" />
+            <div class="leader-info">
+              <span class="leader-name">${escapeHtml(entry.playerName)}</span>
+              <span class="leader-hero">البطل: ${escapeHtml(heroDisplayName)}</span>
+            </div>
+          </div>
+          <div class="leader-score">${entry.score} نقطة</div>
+        `;
+        container.appendChild(row);
+      });
+    } else {
+      const heroTotals = DEFAULT_KIDS.map(kid => {
+        const kidScores = scoresList.filter(s => s.heroId === kid.id);
+        const total = kidScores.reduce((sum, s) => sum + (Number(s.score) || 0), 0);
+        const best = kidScores.reduce((max, s) => Math.max(max, Number(s.score) || 0), 0);
+        return { kid, displayName: getHeroName(kid.id), total, best, plays: kidScores.length };
+      }).sort((a, b) => b.total - a.total || b.best - a.best);
+
+      heroTotals.forEach((item, idx) => {
+        const row = document.createElement("div");
+        row.className = "leader-item" + (idx === 0 && item.total > 0 ? " top-1" : "");
+        const medal = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : (idx + 1);
+        row.innerHTML = `
+          <div class="leader-left">
+            <div class="rank-badge">${medal}</div>
+            <img class="leader-avatar" src="${getHeroPhoto(item.kid.id)}" alt="${escapeHtml(item.displayName)}" />
+            <div class="leader-info">
+              <span class="leader-name">${escapeHtml(item.displayName)}</span>
+              <span class="leader-hero">أعلى جولة: ${item.best} | المحاولات: ${item.plays}</span>
+            </div>
+          </div>
+          <div class="leader-score">${item.total} نقطة</div>
+        `;
+        container.appendChild(row);
+      });
+    }
+  }
+
+  function applyAdminConfigToUI() {
+    const title = (appConfig.gameTitle || "لعبة عبدالعزيز").trim();
+    document.getElementById("brandTitleText").textContent = title;
+    document.title = title;
+
+    const pausedBanner = document.getElementById("pausedBanner");
+    const entryCard = document.getElementById("entryCard");
+    if (appConfig.status === "paused") {
+      pausedBanner.style.display = "block";
+      entryCard.style.display = "none";
+    } else {
+      pausedBanner.style.display = "none";
+      entryCard.style.display = "block";
+    }
+
+    const speedWrap = document.getElementById("speedSelectorWrap");
+    const lockedBadge = document.getElementById("lockedSpeedBadge");
+    const speedLabels = {
+      easy: "🐢 مستوى السرعة المعتمد: سهل (للصغار)",
+      medium: "⚡ مستوى السرعة المعتمد: متوسط",
+      hard: "🔥 مستوى السرعة المعتمد: سريع"
+    };
+    if (appConfig.speedLock && appConfig.speedLock !== "free") {
+      selectedSpeed = appConfig.speedLock;
+      speedWrap.style.display = "none";
+      lockedBadge.style.display = "block";
+      lockedBadge.textContent = speedLabels[selectedSpeed] || "";
+    } else {
+      speedWrap.style.display = "block";
+      lockedBadge.style.display = "none";
+    }
+  }
+
+  // أزرار السرعة والتبويبات والصوت والمشاركة
+  document.querySelectorAll(".speed-btn").forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll(".speed-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      selectedSpeed = btn.dataset.speed;
+    };
+  });
+
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      currentTab = btn.dataset.tab;
+      renderLeaderboard();
+    };
+  });
+
+  document.getElementById("soundToggleBtn").onclick = function() {
+    soundEnabled = !soundEnabled;
+    this.textContent = soundEnabled ? "🔊" : "🔇";
+  };
+
+  document.getElementById("refreshScoresBtn").onclick = () => {
+    syncFromCloud(false);
+    renderLeaderboard();
+    showToast("🔄 تم تحديث القائمة");
+  };
+
+  document.getElementById("shareBtn").onclick = async () => {
+    const cleanUrl = window.location.origin + window.location.pathname;
+    const title = appConfig.gameTitle || "لعبة عبدالعزيز";
+    const shareText = `🚀 تحدي العائلة في ${title}! ادخل اكتب اسمك واختر بطلك ونافسنا على المركز الأول:\n${cleanUrl}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, text: shareText, url: cleanUrl });
+        return;
+      } catch (e) {}
+    }
+    if (copyTextSafe(shareText)) {
+      showToast("✅ تم نسخ رابط التحدي! الصقه الآن في قروب العائلة.");
+    } else {
+      showToast("انسخ الرابط من شريط المتصفح العلوي لمشاركته في القروب.");
+    }
+  };
+
+  // =========================================================================
+  // محرك اللعبة (Canvas HiDPI + Delta-Time 60Hz/120Hz)
+  // =========================================================================
+  const canvas = document.getElementById("gameCanvas");
+  const ctx = canvas.getContext("2d");
+
+  const LOGICAL_W = 420;
+  const LOGICAL_H = 560;
+
+  function setupHiDPICanvas() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 3);
+    canvas.width = LOGICAL_W * dpr;
+    canvas.height = LOGICAL_H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  setupHiDPICanvas();
+  window.addEventListener("resize", setupHiDPICanvas);
+
+  const SPEED_PRESETS = {
+    easy:   { gravity: 0.34, jump: -6.8, pipeSpeed: 2.35, pipeGap: 175, spawnFrames: 118 },
+    medium: { gravity: 0.42, jump: -7.4, pipeSpeed: 3.15, pipeGap: 150, spawnFrames: 98 },
+    hard:   { gravity: 0.50, jump: -8.0, pipeSpeed: 4.00, pipeGap: 132, spawnFrames: 82 }
+  };
+
+  let gameState = "idle"; // idle | ready | playing | gameover
+  let spawnTimer = 0;
+  let score = 0;
+  let currentPlayerName = "";
+  let animId = null;
+  let lastFrameTime = 0;
+  let lastActionStamp = 0;
+
+  const bird = { x: 96, y: 240, vy: 0, radius: 22 };
+  let pipes = [];
+  let bonuses = [];
+  let floatingTexts = [];
+  let clouds = [
+    { x: 60, y: 70, s: 1 },
+    { x: 240, y: 120, s: 0.8 },
+    { x: 370, y: 55, s: 1.15 }
+  ];
+
+  function addFloatingText(x, y, text, color) {
+    floatingTexts.push({ x, y, text, color, life: 42 });
+  }
+
+  function resetGameWorld() {
+    bird.y = LOGICAL_H * 0.44;
+    bird.vy = 0;
+    pipes = [];
+    bonuses = [];
+    floatingTexts = [];
+    spawnTimer = 0;
+    score = 0;
+    lastFrameTime = 0;
+    document.getElementById("hudScore").textContent = "0";
+  }
+
+  function startActiveFlight() {
+    const now = performance.now();
+    if (now - lastActionStamp < 120) return;
+    lastActionStamp = now;
+
+    gameState = "playing";
+    document.getElementById("gameOverlay").style.display = "none";
+    const cfg = SPEED_PRESETS[selectedSpeed] || SPEED_PRESETS.easy;
+    bird.vy = cfg.jump;
+    sfxFlap();
+  }
+
+  function flap() {
+    const now = performance.now();
+    if (now - lastActionStamp < 95) return;
+
+    if (gameState === "ready") {
+      startActiveFlight();
+      return;
+    }
+    if (gameState === "playing") {
+      lastActionStamp = now;
+      const cfg = SPEED_PRESETS[selectedSpeed] || SPEED_PRESETS.easy;
+      bird.vy = cfg.jump;
+      sfxFlap();
+    }
+  }
+
+  function spawnPipeAndBonus() {
+    const cfg = SPEED_PRESETS[selectedSpeed] || SPEED_PRESETS.easy;
+    const minTop = 65;
+    const maxTop = LOGICAL_H - cfg.pipeGap - 95;
+    const topHeight = Math.floor(Math.random() * (maxTop - minTop + 1)) + minTop;
+    const pipeX = LOGICAL_W + 20;
+
+    pipes.push({
+      x: pipeX,
+      width: 58,
+      top: topHeight,
+      bottom: topHeight + cfg.pipeGap,
+      passed: false
+    });
+
+    // مكافأة في منتصف المسافة بين الأعمدة
+    if (Math.random() < 0.68) {
+      const otherKids = DEFAULT_KIDS.filter(k => k.id !== selectedHeroId);
+      const randomKid = otherKids[Math.floor(Math.random() * otherKids.length)];
+      const isKidBubble = Math.random() < 0.45;
+      bonuses.push({
+        x: pipeX + 125,
+        y: topHeight + cfg.pipeGap / 2 + (Math.random() * 50 - 25),
+        radius: 18,
+        type: isKidBubble ? "kid" : "star",
+        kid: randomKid,
+        collected: false
+      });
+    }
+  }
+
+  function endGame() {
+    if (gameState === "gameover") return;
+    gameState = "gameover";
+    sfxHit();
+
+    const cleanName = normalizeName(currentPlayerName);
+    const pKey = makePlayerKey(cleanName, selectedHeroId);
+    const existingIdx = scoresList.findIndex(
+      s => makePlayerKey(s.playerName, s.heroId) === pKey
+    );
+
+    let bestForPlayer = score;
+    let entryToSync = null;
+
+    if (existingIdx >= 0) {
+      if (score > scoresList[existingIdx].score) {
+        scoresList[existingIdx].score = score;
+        scoresList[existingIdx].date = Date.now();
+      }
+      bestForPlayer = scoresList[existingIdx].score;
+      entryToSync = scoresList[existingIdx];
+    } else if (score > 0) {
+      entryToSync = {
+        id: pKey,
+        playerName: cleanName,
+        heroId: selectedHeroId,
+        score: score,
+        date: Date.now()
+      };
+      scoresList.push(entryToSync);
+    }
+
+    saveLocalScores(scoresList);
+    if (entryToSync) {
+      syncSingleScoreToCloud(entryToSync);
+    }
+    renderLeaderboard();
+
+    const heroDisplayName = getHeroName(selectedHeroId);
+    document.getElementById("finalScoreText").textContent = score;
+    document.getElementById("bestScoreText").textContent = bestForPlayer;
+    document.getElementById("gameOverMsg").textContent =
+      score >= 15 ? `أسطوري يا ${cleanName}! حلّقت عالياً مع ${heroDisplayName} 🔥` :
+      score >= 5  ? `رائع يا ${cleanName}! نتيجة جميلة مع ${heroDisplayName} 👏` :
+                    `حاول مرة ثانية يا ${cleanName} لتحطم الرقم القياسي! 💪`;
+
+    document.getElementById("readyBox").style.display = "none";
+    document.getElementById("gameOverBox").style.display = "block";
+    document.getElementById("gameOverlay").style.display = "flex";
+  }
+
+  function updateGame(dt) {
+    const cfg = SPEED_PRESETS[selectedSpeed] || SPEED_PRESETS.easy;
+
+    clouds.forEach(c => {
+      c.x -= 0.4 * c.s * dt;
+      if (c.x < -80) c.x = LOGICAL_W + 60;
+    });
+
+    for (let i = floatingTexts.length - 1; i >= 0; i--) {
+      floatingTexts[i].y -= 0.9 * dt;
+      floatingTexts[i].life -= dt;
+      if (floatingTexts[i].life <= 0) floatingTexts.splice(i, 1);
+    }
+
+    if (gameState !== "playing") return;
+
+    spawnTimer += dt;
+    if (spawnTimer >= cfg.spawnFrames) {
+      spawnTimer -= cfg.spawnFrames;
+      spawnPipeAndBonus();
+    }
+
+    bird.vy += cfg.gravity * dt;
+    bird.y += bird.vy * dt;
+
+    const groundY = LOGICAL_H - 34;
+    if (bird.y + bird.radius >= groundY) {
+      bird.y = groundY - bird.radius;
+      endGame();
+      return;
+    }
+    if (bird.y - bird.radius <= 0) {
+      bird.y = bird.radius;
+      bird.vy = 0;
+    }
+
+    for (let i = pipes.length - 1; i >= 0; i--) {
+      const p = pipes[i];
+      p.x -= cfg.pipeSpeed * dt;
+
+      if (!p.passed && p.x + p.width < bird.x) {
+        p.passed = true;
+        score += 1;
+        document.getElementById("hudScore").textContent = score;
+        addFloatingText(bird.x, bird.y - 28, "+1", "#ffffff");
+        sfxScore();
+      }
+
+      const margin = 4;
+      const hitX = bird.x + bird.radius - margin > p.x && bird.x - bird.radius + margin < p.x + p.width;
+      const hitTop = bird.y - bird.radius + margin < p.top;
+      const hitBottom = bird.y + bird.radius - margin > p.bottom;
+
+      if (hitX && (hitTop || hitBottom)) {
+        endGame();
+        return;
+      }
+
+      if (p.x + p.width < -20) pipes.splice(i, 1);
+    }
+
+    for (let i = bonuses.length - 1; i >= 0; i--) {
+      const b = bonuses[i];
+      b.x -= cfg.pipeSpeed * dt;
+      if (!b.collected) {
+        const dx = bird.x - b.x;
+        const dy = bird.y - b.y;
+        if (Math.hypot(dx, dy) < bird.radius + b.radius) {
+          b.collected = true;
+          const pts = b.type === "kid" ? 3 : 2;
+          score += pts;
+          document.getElementById("hudScore").textContent = score;
+          addFloatingText(b.x, b.y - 14, `+${pts}`, "#fef08a");
+          sfxBonus();
+        }
+      }
+      if (b.x < -40) bonuses.splice(i, 1);
+    }
+  }
+
+  function drawGame() {
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, LOGICAL_H);
+    skyGrad.addColorStop(0, "#38bdf8");
+    skyGrad.addColorStop(1, "#bae6fd");
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
+
+    // الشمس
+    ctx.fillStyle = "rgba(253, 224, 71, 0.88)";
+    ctx.beginPath();
+    ctx.arc(355, 68, 34, 0, Math.PI * 2);
+    ctx.fill();
+
+    // الغيوم
+    ctx.fillStyle = "rgba(255, 255, 255, 0.86)";
+    clouds.forEach(c => {
+      ctx.beginPath();
+      ctx.arc(c.x, c.y, 20 * c.s, 0, Math.PI * 2);
+      ctx.arc(c.x + 18 * c.s, c.y - 6 * c.s, 24 * c.s, 0, Math.PI * 2);
+      ctx.arc(c.x + 38 * c.s, c.y, 18 * c.s, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // الأعمدة الخضراء
+    pipes.forEach(p => {
+      const grad = ctx.createLinearGradient(p.x, 0, p.x + p.width, 0);
+      grad.addColorStop(0, "#16a34a");
+      grad.addColorStop(0.5, "#22c55e");
+      grad.addColorStop(1, "#15803d");
+      ctx.fillStyle = grad;
+
+      // العمود العلوي
+      ctx.fillRect(p.x, 0, p.width, p.top);
+      ctx.fillStyle = "#14532d";
+      ctx.fillRect(p.x - 4, p.top - 18, p.width + 8, 18);
+
+      // العمود السفلي
+      ctx.fillStyle = grad;
+      ctx.fillRect(p.x, p.bottom, p.width, LOGICAL_H - p.bottom - 34);
+      ctx.fillStyle = "#14532d";
+      ctx.fillRect(p.x - 4, p.bottom, p.width + 8, 18);
+    });
+
+    // المكافآت
+    bonuses.forEach(b => {
+      if (b.collected) return;
+      if (b.type === "star") {
+        ctx.fillStyle = "#facc15";
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+        ctx.fillStyle = "#713f12";
+        ctx.font = "bold 16px sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("★", b.x, b.y + 1);
+      } else {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+        ctx.clip();
+        const kImg = imageCache[b.kid.id];
+        if (kImg && kImg.complete && kImg.naturalWidth > 0) {
+          ctx.drawImage(kImg, b.x - b.radius, b.y - b.radius, b.radius * 2, b.radius * 2);
+        }
+        ctx.restore();
+        ctx.strokeStyle = "#f59e0b";
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    });
+
+    // الأرضية
+    const groundY = LOGICAL_H - 34;
+    ctx.fillStyle = "#65a30d";
+    ctx.fillRect(0, groundY, LOGICAL_W, 10);
+    ctx.fillStyle = "#d97706";
+    ctx.fillRect(0, groundY + 10, LOGICAL_W, 24);
+
+    // البطل الطائر
+    ctx.save();
+    ctx.translate(bird.x, bird.y);
+    const tilt = Math.max(-0.35, Math.min(0.45, bird.vy * 0.05));
+    ctx.rotate(tilt);
+
+    ctx.beginPath();
+    ctx.arc(0, 0, bird.radius + 3, 0, Math.PI * 2);
+    ctx.fillStyle = "#ffffff";
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(0, 0, bird.radius, 0, Math.PI * 2);
+    ctx.clip();
+    const heroImg = imageCache[selectedHeroId];
+    if (heroImg && heroImg.complete && heroImg.naturalWidth > 0) {
+      ctx.drawImage(heroImg, -bird.radius, -bird.radius, bird.radius * 2, bird.radius * 2);
+    }
+    ctx.restore();
+
+    // النقاط العائمة
+    floatingTexts.forEach(ft => {
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, ft.life / 42);
+      ctx.font = "900 18px system-ui, sans-serif";
+      ctx.textAlign = "center";
+      ctx.strokeStyle = "#0f172a";
+      ctx.lineWidth = 3.5;
+      ctx.strokeText(ft.text, ft.x, ft.y);
+      ctx.fillStyle = ft.color;
+      ctx.fillText(ft.text, ft.x, ft.y);
+      ctx.restore();
+    });
+  }
+
+  function gameLoop(now) {
+    if (gameState === "idle") {
+      animId = null;
+      return;
+    }
+    const dt = lastFrameTime ? Math.min((now - lastFrameTime) / (1000 / 60), 2.5) : 1;
+    lastFrameTime = now;
+
+    updateGame(dt);
+    drawGame();
+    animId = requestAnimationFrame(gameLoop);
+  }
+
+  function startLoopIfNeeded() {
+    if (!animId) {
+      lastFrameTime = 0;
+      animId = requestAnimationFrame(gameLoop);
+    }
+  }
+
+  // التحكم باللمس ولوحة المفاتيح
+  canvas.addEventListener("pointerdown", e => {
+    e.preventDefault();
+    flap();
+  });
+
+  document.getElementById("tapStartBtn").addEventListener("pointerdown", e => {
+    e.stopPropagation();
+    e.preventDefault();
+    startActiveFlight();
+  });
+
+  document.getElementById("tapStartBtn").addEventListener("click", e => {
+    e.stopPropagation();
+    e.preventDefault();
+    startActiveFlight();
+  });
+
+  window.addEventListener("keydown", e => {
+    if (e.code === "Space" || e.code === "ArrowUp") {
+      if (document.getElementById("gameScreen").style.display === "flex") {
+        e.preventDefault();
+        flap();
+      }
+    }
+  });
+
+  // بدء اللعب من شاشة البداية
+  document.getElementById("startGameBtn").onclick = () => {
+    const input = document.getElementById("playerNameInput");
+    const err = document.getElementById("nameError");
+    const nameVal = normalizeName(input.value);
+    if (!nameVal) {
+      err.style.display = "block";
+      input.classList.remove("shake");
+      void input.offsetWidth;
+      input.classList.add("shake");
+      input.focus();
+      return;
+    }
+    err.style.display = "none";
+    input.value = nameVal;
+    currentPlayerName = nameVal;
+
+    const heroDisplayName = getHeroName(selectedHeroId);
+    document.getElementById("hudAvatar").src = getHeroPhoto(selectedHeroId);
+    document.getElementById("hudPlayerName").textContent = currentPlayerName;
+    document.getElementById("hudHeroName").textContent = "البطل: " + heroDisplayName;
+
+    document.getElementById("lobbyScreen").style.display = "none";
+    document.getElementById("gameScreen").style.display = "flex";
+    document.getElementById("readyBox").style.display = "block";
+    document.getElementById("gameOverBox").style.display = "none";
+    document.getElementById("gameOverlay").style.display = "flex";
+
+    setupHiDPICanvas();
+    resetGameWorld();
+    gameState = "ready";
+    startLoopIfNeeded();
+  };
+
+  document.getElementById("playAgainBtn").onclick = () => {
+    resetGameWorld();
+    gameState = "ready";
+    document.getElementById("readyBox").style.display = "block";
+    document.getElementById("gameOverBox").style.display = "none";
+    document.getElementById("gameOverlay").style.display = "flex";
+    startLoopIfNeeded();
+  };
+
+  function returnToLobby() {
+    gameState = "idle";
+    document.getElementById("gameScreen").style.display = "none";
+    document.getElementById("lobbyScreen").style.display = "flex";
+    renderLeaderboard();
+    if (getCleanDbUrl()) syncFromCloud(true);
+  }
+
+  document.getElementById("backToLobbyBtn").onclick = returnToLobby;
+  document.getElementById("exitGameBtn").onclick = returnToLobby;
+
+  // =========================================================================
+  // لوحة تحكم المشرف (Admin Panel)
+  // =========================================================================
+  function collectAdminInputsIntoConfig() {
+    const titleInp = document.getElementById("adminGameTitle");
+    if (titleInp && titleInp.value.trim()) {
+      appConfig.gameTitle = titleInp.value.trim();
+    }
+    const speedEl = document.getElementById("adminSpeedLock");
+    if (speedEl) appConfig.speedLock = speedEl.value;
+
+    const statusEl = document.getElementById("adminGameStatus");
+    if (statusEl) appConfig.status = statusEl.value;
+
+    const fbEl = document.getElementById("adminFirebaseUrl");
+    if (fbEl) appConfig.firebaseUrl = fbEl.value.trim();
+
+    const pinEl = document.getElementById("adminNewPin");
+    if (pinEl && pinEl.value.trim()) {
+      appConfig.pin = pinEl.value.trim();
+    }
+
+    document.querySelectorAll("[data-kid-name]").forEach(inp => {
+      const kidId = inp.dataset.kidName;
+      const val = inp.value.trim();
+      if (val) {
+        appConfig.customNames[kidId] = val;
+      } else {
+        delete appConfig.customNames[kidId];
+      }
+    });
+  }
+
+  function openAdminPanel() {
+    isAdminAuthenticated = true;
+    document.getElementById("lobbyScreen").style.display = "none";
+    document.getElementById("gameScreen").style.display = "none";
+    document.getElementById("adminScreen").style.display = "flex";
+
+    document.getElementById("adminGameTitle").value = appConfig.gameTitle || "لعبة عبدالعزيز";
+    document.getElementById("adminSpeedLock").value = appConfig.speedLock || "free";
+    document.getElementById("adminGameStatus").value = appConfig.status || "open";
+    document.getElementById("adminFirebaseUrl").value = appConfig.firebaseUrl || "";
+    document.getElementById("adminNewPin").value = "";
+
+    renderAdminHeroesList();
+    renderAdminScoresList();
+  }
+
+  function renderAdminHeroesList() {
+    const list = document.getElementById("adminHeroesList");
+    list.innerHTML = "";
+    DEFAULT_KIDS.forEach(kid => {
+      const currentName = getHeroName(kid.id);
+      const row = document.createElement("div");
+      row.className = "admin-hero-row";
+      row.innerHTML = `
+        <div style="display:flex; align-items:center; gap:8px;">
+          <img src="${getHeroPhoto(kid.id)}" style="width:42px; height:42px; border-radius:50%; object-fit:cover; border:2px solid #cbd5e1;" />
+          <input type="text" class="mini-name-input" data-kid-name="${kid.id}" value="${escapeHtml(currentName)}" maxlength="16" />
+        </div>
+        <div style="display:flex; gap:5px; align-items:center;">
+          <label class="upload-label">
+            📷 صورة
+            <input type="file" accept="image/*" style="display:none;" data-kid="${kid.id}" />
+          </label>
+          ${appConfig.customPhotos[kid.id] ? `<button type="button" class="del-btn" data-reset-kid="${kid.id}">حذف الصورة</button>` : ""}
+        </div>
+      `;
+      list.appendChild(row);
+    });
+
+    list.querySelectorAll('input[type="file"]').forEach(inp => {
+      inp.onchange = e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const kidId = inp.dataset.kid;
+        const reader = new FileReader();
+        reader.onload = ev => {
+          const img = new Image();
+          img.onload = () => {
+            const c = document.createElement("canvas");
+            c.width = 160;
+            c.height = 160;
+            const cx = c.getContext("2d");
+            const size = Math.min(img.width, img.height);
+            const sx = (img.width - size) / 2;
+            const sy = (img.height - size) / 2;
+            cx.drawImage(img, sx, sy, size, size, 0, 0, 160, 160);
+            appConfig.customPhotos[kidId] = c.toDataURL("image/jpeg", 0.82);
+            saveLocalConfig(appConfig);
+            preloadImages();
+            renderHeroesGrid();
+            renderAdminHeroesList();
+            pushConfigToCloud();
+            showToast("✅ تم تحديث الصورة بنجاح");
+          };
+          img.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+      };
+    });
+
+    list.querySelectorAll("[data-reset-kid]").forEach(btn => {
+      btn.onclick = () => {
+        delete appConfig.customPhotos[btn.dataset.resetKid];
+        saveLocalConfig(appConfig);
+        preloadImages();
+        renderHeroesGrid();
+        renderAdminHeroesList();
+        pushConfigToCloud();
+        showToast("تمت استعادة الصورة الافتراضية");
+      };
+    });
+  }
+
+  function renderAdminScoresList() {
+    const box = document.getElementById("adminScoresList");
+    box.innerHTML = "";
+    const sorted = [...scoresList].sort((a, b) => b.score - a.score);
+    if (sorted.length === 0) {
+      box.innerHTML = `<div class="empty-state">لا توجد نتائج حالياً</div>`;
+      return;
+    }
+    sorted.forEach(item => {
+      const heroDisplayName = getHeroName(item.heroId);
+      const div = document.createElement("div");
+      div.className = "leader-item";
+      div.innerHTML = `
+        <div>
+          <strong>${escapeHtml(item.playerName)}</strong>
+          <span style="font-size:0.8rem; color:#64748b; font-weight:700;"> (${escapeHtml(heroDisplayName)} — ${item.score} نقطة)</span>
+        </div>
+        <button type="button" class="del-btn">حذف</button>
+      `;
+      div.querySelector("button").onclick = async () => {
+        const keyToDelete = makePlayerKey(item.playerName, item.heroId);
+        scoresList = scoresList.filter(s => makePlayerKey(s.playerName, s.heroId) !== keyToDelete);
+        saveLocalScores(scoresList);
+        renderAdminScoresList();
+        renderLeaderboard();
+        const dbUrl = getCleanDbUrl();
+        if (dbUrl) {
+          try {
+            await fetch(`${dbUrl}/family_game/scores/${keyToDelete}.json`, { method: "DELETE" });
+          } catch (e) {}
+        }
+        showToast("🗑️ تم حذف النتيجة");
+      };
+      box.appendChild(div);
+    });
+  }
+
+  document.getElementById("saveAdminSettingsBtn").onclick = async () => {
+    collectAdminInputsIntoConfig();
+    saveLocalConfig(appConfig);
+    preloadImages();
+    applyAdminConfigToUI();
+    renderHeroesGrid();
+    renderLeaderboard();
+    document.getElementById("adminNewPin").value = "";
+
+    if (getCleanDbUrl()) {
+      await pushConfigToCloud();
+      await syncFromCloud(true);
+      showToast("✅ تم حفظ الإعدادات ومزامنتها أونلاين للجميع!");
+    } else {
+      showToast("✅ تم الحفظ محلياً! لتثبيتها في GitHub اضغط زر تنزيل index.html بالأسفل.", 4500);
+    }
+  };
+
+  // نافذة تأكيد تصفير الكل (بدون confirm)
+  document.getElementById("resetScoresBtn").onclick = () => {
+    document.getElementById("confirmModal").style.display = "flex";
+  };
+
+  document.getElementById("confirmResetNoBtn").onclick = () => {
+    document.getElementById("confirmModal").style.display = "none";
+  };
+
+  document.getElementById("confirmResetYesBtn").onclick = async () => {
+    document.getElementById("confirmModal").style.display = "none";
+    scoresList = [];
+    saveLocalScores(scoresList);
+    renderAdminScoresList();
+    renderLeaderboard();
+    const dbUrl = getCleanDbUrl();
+    if (dbUrl) {
+      try {
+        await fetch(`${dbUrl}/family_game/scores.json`, { method: "DELETE" });
+      } catch (e) {}
+    }
+    showToast("🧹 تم تصفير جميع نتائج قائمة الترتيب");
+  };
+
+  // تصدير ملف index.html نظيف وجاهز لرفعه في GitHub Pages
+  document.getElementById("exportBakedHtmlBtn").onclick = () => {
+    collectAdminInputsIntoConfig();
+    saveLocalConfig(appConfig);
+
+    // تفريغ حقول كلمات المرور قبل الاستنساخ لضمان عدم حفظ أي رمز داخل قيمة الحقل الظاهرة
+    const pinInp = document.getElementById("pinInput");
+    const newPinInp = document.getElementById("adminNewPin");
+    if (pinInp) { pinInp.value = ""; pinInp.removeAttribute("value"); }
+    if (newPinInp) { newPinInp.value = ""; newPinInp.removeAttribute("value"); }
+
+    const docClone = document.documentElement.cloneNode(true);
+    const cfgScript = docClone.querySelector("#embedded-config");
+    if (cfgScript) {
+      const safeJson = JSON.stringify(appConfig, null, 2).replace(/<\//g, "<\\/");
+      cfgScript.textContent = "\n" + safeJson + "\n";
+    }
+
+    const titleEl = docClone.querySelector("#brandTitleText");
+    if (titleEl) titleEl.textContent = appConfig.gameTitle || "لعبة عبدالعزيز";
+    const docTitleEl = docClone.querySelector("title");
+    if (docTitleEl) docTitleEl.textContent = appConfig.gameTitle || "لعبة عبدالعزيز";
+
+    // إعادة ضبط الشاشات في النسخة المصدرة لتفتح على شاشة اللاعبين نظيفة
+    const lobbyEl = docClone.querySelector("#lobbyScreen");
+    const gameEl = docClone.querySelector("#gameScreen");
+    const adminEl = docClone.querySelector("#adminScreen");
+    const pinModalEl = docClone.querySelector("#pinModal");
+    const confirmModalEl = docClone.querySelector("#confirmModal");
+    const toastEl = docClone.querySelector("#toastBanner");
+
+    if (lobbyEl) lobbyEl.style.display = "flex";
+    if (gameEl) gameEl.style.display = "none";
+    if (adminEl) adminEl.style.display = "none";
+    if (pinModalEl) pinModalEl.style.display = "none";
+    if (confirmModalEl) confirmModalEl.style.display = "none";
+    if (toastEl) { toastEl.classList.remove("show"); toastEl.textContent = ""; }
+
+    ["#heroesGrid", "#leaderboardList", "#adminHeroesList", "#adminScoresList"].forEach(sel => {
+      const el = docClone.querySelector(sel);
+      if (el) el.innerHTML = "";
+    });
+
+    const clonedNameInp = docClone.querySelector("#playerNameInput");
+    if (clonedNameInp) { clonedNameInp.value = ""; clonedNameInp.removeAttribute("value"); }
+
+    const clonedPinInp = docClone.querySelector("#pinInput");
+    if (clonedPinInp) { clonedPinInp.value = ""; clonedPinInp.removeAttribute("value"); }
+
+    const clonedNewPinInp = docClone.querySelector("#adminNewPin");
+    if (clonedNewPinInp) { clonedNewPinInp.value = ""; clonedNewPinInp.removeAttribute("value"); }
+
+    const fullHtml = "<!DOCTYPE html>\n" + docClone.outerHTML;
+    const blob = new Blob([fullHtml], { type: "text/html;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "index.html";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+
+    showToast("✅ تم تنزيل ملف index.html! ارفعه الآن في GitHub مكان القديم.", 4500);
+  };
+
+  document.getElementById("copyPlayerLinkBtn").onclick = () => {
+    const url = window.location.origin + window.location.pathname;
+    if (copyTextSafe(url)) {
+      showToast("✅ تم نسخ رابط اللاعبين (للقروب)");
+    } else {
+      showToast("الرابط: " + url);
+    }
+  };
+
+  document.getElementById("copyAdminLinkBtn").onclick = () => {
+    const url = window.location.origin + window.location.pathname + "?admin=1";
+    if (copyTextSafe(url)) {
+      showToast("🔐 تم نسخ رابط المشرف الخاص بك");
+    } else {
+      showToast("الرابط: " + url);
+    }
+  };
+
+  // نافذة التحقق من الرقم السري للمشرف
+  function submitAdminPin() {
+    const entered = document.getElementById("pinInput").value.trim();
+    if (entered === String(appConfig.pin)) {
+      document.getElementById("pinModal").style.display = "none";
+      document.getElementById("pinInput").value = "";
+      openAdminPanel();
+    } else {
+      document.getElementById("pinError").style.display = "block";
+      const box = document.getElementById("pinInput");
+      box.classList.remove("shake");
+      void box.offsetWidth;
+      box.classList.add("shake");
+    }
+  }
+
+  document.getElementById("adminLockBtn").onclick = () => {
+    if (isAdminAuthenticated) {
+      openAdminPanel();
+      return;
+    }
+    document.getElementById("pinInput").value = "";
+    document.getElementById("pinError").style.display = "none";
+    document.getElementById("pinModal").style.display = "flex";
+    setTimeout(() => document.getElementById("pinInput").focus(), 60);
+  };
+
+  document.getElementById("closePinModalBtn").onclick = () => {
+    document.getElementById("pinModal").style.display = "none";
+  };
+
+  document.getElementById("verifyPinBtn").onclick = submitAdminPin;
+
+  document.getElementById("pinInput").addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      submitAdminPin();
+    }
+  });
+
+  document.getElementById("exitAdminBtn").onclick = () => {
+    document.getElementById("adminScreen").style.display = "none";
+    document.getElementById("lobbyScreen").style.display = "flex";
+    applyAdminConfigToUI();
+    renderHeroesGrid();
+    renderLeaderboard();
+  };
+
+  // تهيئة التطبيق عند الفتح
+  document.getElementById("playerNameInput").value = "";
+  applyAdminConfigToUI();
+  renderHeroesGrid();
+  renderLeaderboard();
+  syncFromCloud(true);
+  startAutoPolling();
+
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get("admin") === "1") {
+    document.getElementById("pinModal").style.display = "flex";
+    setTimeout(() => document.getElementById("pinInput").focus(), 60);
+  }
+})();
+</script>
+</body>
+</html>
